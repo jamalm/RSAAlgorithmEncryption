@@ -3,11 +3,13 @@
  */
 package com.deadmadness.algorithm;
 
+import java.math.BigInteger;
+
 /**
  * @author deadmadness
  *
  */
-public class Encryption {
+public class RSA {
 
 	/**
 	 * @param args
@@ -16,10 +18,16 @@ public class Encryption {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		PrimeGen generator = new PrimeGen();
-		int p = generator.genLargePrime();
-		int q = generator.genLargePrime();
-		int n = p*q;
-		int nMinus = (p-1)*(q-1);
+		BigInteger p = generator.genLargePrime();
+		BigInteger q = generator.genLargePrime();
+		BigInteger n = p.multiply(q);
+		
+		System.out.println("Done!!");
+		System.out.println("P = " + p);
+		System.out.println("Q = " + q);
+		System.out.println("N = " + n);
+		//int nMinus = (p.subtract(BigInteger.ONE).multiply((q.subtract(BigInteger.ONE)));
+		/*
 		String pubKey;
 		int e;
 		while(n < 0 || nMinus < 0) {
@@ -31,6 +39,8 @@ public class Encryption {
 				n = -1;
 			}
 		}
+		
+
 		System.out.println("N:" + n);
 		
 		e = generator.genPrime();
@@ -43,7 +53,7 @@ public class Encryption {
 		}
 		else {
 			System.out.println("No relPrime found");
-		}
+		}*/
 	}
 
 }
