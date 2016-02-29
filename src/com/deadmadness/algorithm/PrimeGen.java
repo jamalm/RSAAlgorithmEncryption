@@ -12,10 +12,12 @@ import java.math.BigInteger;
 public class PrimeGen {
 	private SecureRandom r = new SecureRandom();
 	
-	private static int bitSize = 48;
+	//Set to 128 for 2^128 numbers
+	private static int bitSize = 60;
 	private static final BigInteger TWO = new BigInteger("2");
 
 	private BigInteger p;
+	private BigInteger e;
 	
 	PrimeGen(){
 		//constructor
@@ -113,7 +115,7 @@ public class PrimeGen {
 			return false;
 		}
 		
-		// check if even number, if it is, it's false
+		// check if even number
 		if(n.remainder(TWO).equals(BigInteger.ZERO)) {
 			return false;
 		}
@@ -126,7 +128,7 @@ public class PrimeGen {
 		 */
 		for(BigInteger i = new BigInteger("3"); i.compareTo(sqRoot)==-1; i = i.add(TWO)) 
 		{
-			System.out.println(i);
+			//System.out.println(i);
 			//check if num divides evenly anywhere
 			if(n.remainder(i).equals(BigInteger.ZERO)) {
 				
@@ -135,7 +137,6 @@ public class PrimeGen {
 			}
 			
 		}
-		
 		return true;
 	}
 	

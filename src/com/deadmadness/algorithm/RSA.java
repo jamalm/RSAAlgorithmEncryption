@@ -4,7 +4,6 @@
 package com.deadmadness.algorithm;
 
 import java.math.BigInteger;
-
 /**
  * @author deadmadness
  *
@@ -26,23 +25,17 @@ public class RSA {
 		System.out.println("P = " + p);
 		System.out.println("Q = " + q);
 		System.out.println("N = " + n);
-		//int nMinus = (p.subtract(BigInteger.ONE).multiply((q.subtract(BigInteger.ONE)));
-		/*
-		String pubKey;
-		int e;
-		while(n < 0 || nMinus < 0) {
-			p = generator.genLargePrime();
-			q = generator.genLargePrime();
-			n = p*q;
-			if ((nMinus = (p-1)*(q-1)) < 0) {
-				System.out.println("nMinus is too large");
-				n = -1;
-			}
-		}
 		
+		// phi = (p-1) * (q-1)
+		BigInteger phi = (p.subtract(BigInteger.ONE).multiply((q.subtract(BigInteger.ONE))));
+		
+		BigInteger pubKey;
 
-		System.out.println("N:" + n);
-		
+		System.out.println("Phi:" + phi);
+		/*
+		pubKey = generator.genPublicKey(phi);
+		*/
+		/*
 		e = generator.genPrime();
 		
 		System.out.println("P:" + p + " Q:" + q + " N minus: " + nMinus);
@@ -53,7 +46,8 @@ public class RSA {
 		}
 		else {
 			System.out.println("No relPrime found");
-		}*/
+		}
+		*/
 	}
 
 }
