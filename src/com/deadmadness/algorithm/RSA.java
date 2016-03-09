@@ -11,7 +11,6 @@ import java.math.BigInteger;
 public class RSA {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		PrimeGen generator = new PrimeGen();
 		BigInteger[] keys = new BigInteger[3];
 		
@@ -21,9 +20,7 @@ public class RSA {
 		System.out.println("E = " + keys[0]);
 		System.out.println("N = " + keys[1]);
 		System.out.println("D = " + keys[2]);
-
 		
-
 	}
 
 }

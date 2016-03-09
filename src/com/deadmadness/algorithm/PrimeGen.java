@@ -13,7 +13,7 @@ public class PrimeGen {
 	private SecureRandom r = new SecureRandom();
 	
 	//Set to 128 for 2^128 numbers
-	private static int bitSize = 32;
+	private static int bitSize = 50;
 	private static final BigInteger TWO = new BigInteger("2");
 
 	private BigInteger p;
@@ -23,8 +23,11 @@ public class PrimeGen {
 	private BigInteger d;
 	private BigInteger phi;
 	
+	
+	
+	//constructor
 	PrimeGen(){
-		//constructor
+
 		p = genLargePrime();
 		q = genLargePrime();
 		n = p.multiply(q);
@@ -41,6 +44,9 @@ public class PrimeGen {
 		d = modInverse(phi, e);
 
 	}
+	
+	
+	
 
 	
 	//generates a prime number in a large  num range
@@ -63,19 +69,12 @@ public class PrimeGen {
 		}
 		return p;
 	}
-	/*
-	public int genPrime(){
-		r = new Random();
-		
-		while(true){
-			e = r.nextInt(127 - 2) + 2;
-			if(isPrime(e)) {
-				System.out.println("Choose E:" + e);
-				break;
-			}
-		}
-		return e;
-	}*/
+
+	
+	
+	
+	
+	
 	
 	public BigInteger genE(BigInteger phi) {
 		BigInteger e = genLargePrime();
@@ -95,6 +94,8 @@ public class PrimeGen {
 		}
 	}
 
+	
+	
 	
 	
 	//calculates if e and phi are relatively prime
@@ -120,6 +121,9 @@ public class PrimeGen {
 		}
 
 	}
+	
+	
+	
 	
 	
 	
@@ -157,6 +161,9 @@ public class PrimeGen {
 	}
 	
 	
+	
+	
+	
 	//generates an approx root of prime number
 	private static BigInteger root(BigInteger n) {
 		BigInteger divisor = n.shiftRight(1);
@@ -167,6 +174,10 @@ public class PrimeGen {
 		//System.out.println("Root: " + divisor.shiftLeft(1));
 		return divisor.shiftLeft(1);
 	}
+	
+	
+	
+	
 	
 	
 	//Gets ed mod phi = 1
@@ -203,6 +214,9 @@ public class PrimeGen {
 		}
 	}
 
+	
+	
+	
 
 	//returns generated keys
 	public BigInteger[] getKeys(){
