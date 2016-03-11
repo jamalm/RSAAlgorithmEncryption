@@ -50,7 +50,7 @@ public class PrimeGen {
 
 	
 	//generates a prime number in a large  num range
-	public BigInteger genLargePrime() {
+	private BigInteger genLargePrime() {
 		r = new SecureRandom();
 		BigInteger p;
 	
@@ -76,7 +76,7 @@ public class PrimeGen {
 	
 	
 	
-	public BigInteger genE(BigInteger phi) {
+	private BigInteger genE(BigInteger phi) {
 		BigInteger e = genLargePrime();
 		
 		if(e.compareTo(phi) == 1){
@@ -181,7 +181,7 @@ public class PrimeGen {
 	
 	
 	//Gets ed mod phi = 1
-	public BigInteger modInverse(BigInteger phi ,BigInteger e){
+	private BigInteger modInverse(BigInteger phi ,BigInteger e){
 		
 		BigInteger p = phi;
 		BigInteger x1 = BigInteger.ZERO;
