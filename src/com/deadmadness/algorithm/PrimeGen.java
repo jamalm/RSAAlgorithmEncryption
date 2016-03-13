@@ -26,7 +26,7 @@ public class PrimeGen {
 	
 	
 	//constructor
-	PrimeGen(){
+	public PrimeGen(){
 
 		p = genLargePrime();
 		q = genLargePrime();
@@ -221,9 +221,9 @@ public class PrimeGen {
 	//returns generated keys
 	public BigInteger[] getKeys(){
 		BigInteger[] keys = new BigInteger[3];
-		keys[0] = e;
-		keys[1] = n;
-		keys[2] = d;
+		keys[0] = n;	//public key
+		keys[1] = e;	//public exponent
+		keys[2] = d;	//private key
 		return keys;
 	}
 }
