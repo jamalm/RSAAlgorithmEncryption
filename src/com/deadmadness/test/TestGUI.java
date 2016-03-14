@@ -60,7 +60,7 @@ public class TestGUI extends JFrame{
 			instance = this;
 			btnGenerateKeys.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent e){
-					generate = new PrimeGen();
+					generate = new PrimeGen("50");
 					keys = generate.getKeys();
 					pubKeybox.setText("" + keys[0]);
 					pubExbox.setText("" + keys[1]);
