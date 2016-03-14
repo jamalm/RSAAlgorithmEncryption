@@ -6,7 +6,7 @@ import com.deadmadness.algorithm.*;
 
 public class TestClass {
 
-	
+	/*
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		PrimeGen generate = new PrimeGen();
@@ -39,6 +39,6 @@ public class TestClass {
 			decryptedMessage += ((char)decrypted[i].intValue());
 		}
 		System.out.println("\nDecrypted Message: " + decryptedMessage);
-	}
+	}*/
 
 }
