@@ -6,9 +6,16 @@
 *.ear
 
 # Other Eclipse files #
+<<<<<<< HEAD
 .classpath
 .project
 bin/
 .settings
+=======
+*.classpath
+*.project
+*bin/com/deadmadness
+*.settings
+>>>>>>> d5c1ae90edbd5baa75bd4c659c0656488bc1b43c
 
 
