@@ -8,7 +8,7 @@
 # Other Eclipse files #
 .classpath
 .project
-bin/com/deadmadness
+bin/
 .settings
 
 
