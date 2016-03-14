@@ -13,7 +13,7 @@ public class PrimeGen {
 	private SecureRandom r = new SecureRandom();
 	
 	//Set to 128 for 2^128 numbers
-	private static int bitSize = 50;
+	private int bitSize;
 	private static final BigInteger TWO = new BigInteger("2");
 
 	private BigInteger p;
@@ -26,8 +26,8 @@ public class PrimeGen {
 	
 	
 	//constructor
-	public PrimeGen(){
-
+	public PrimeGen(String bits){
+		setBits(bits);
 		p = genLargePrime();
 		q = genLargePrime();
 		n = p.multiply(q);
@@ -225,5 +225,14 @@ public class PrimeGen {
 		keys[1] = e;	//public exponent
 		keys[2] = d;	//private key
 		return keys;
+	}
+	
+	public void setBits(String bits){
+		
+		bitSize = Integer.parseInt(bits);
+	}
+	
+	public int getBits(){
+		return bitSize;
 	}
 }

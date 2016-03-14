@@ -3,41 +3,41 @@ package com.deadmadness.algorithm;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigInteger;
+import java.util.Scanner;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
-import com.deadmadness.test.TestGUI;
-import com.deadmadness.test.TestGUI.Browse;
-import com.deadmadness.test.TestGUI.Message;
-/*
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.math.BigInteger;
-import java.awt.event.ActionEvent;
-*/
 public class GUI extends JFrame{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1454019719794475451L;
 	//RSA encryption classes
 		static RSA encrypter = new RSA();
 		static PrimeGen generate;
 		
 		//BigInteger variables
 		static BigInteger[] encrypted = new BigInteger[3000];
+		static BigInteger[] encryptedFile = new BigInteger[30000];
 		static BigInteger[] decrypted = new BigInteger[3000];
+		static BigInteger[] decryptedFile = new BigInteger[30000];
 		static BigInteger[] keys = new BigInteger[3];
 		static String outToInput = "";
+		static String filePath = "";
+		static String inputString = "";
 		
 		//first window for message encryption / decryption.
 		
@@ -49,40 +49,45 @@ public class GUI extends JFrame{
 		static final JTextPane pubKeybox = new JTextPane();
 		static final JTextPane pubExbox = new JTextPane();
 		static final JTextPane privKeybox = new JTextPane();
+		static final JTextPane fileBox = new JTextPane();
+		static final JTextPane bitSet = new JTextPane();
+		
+
 		//labels
 		static final JLabel lblOutput = new JLabel("Output");
 		static final JLabel lblInput = new JLabel("Input");
 		static final JLabel lblPublicKey = new JLabel("Public Key");
 		static final JLabel lblPrivateKey = new JLabel("Private key");
 		static final JLabel lblPublicExponent = new JLabel("Public Exponent");
+		static final JLabel lblSetBits = new JLabel("Bits:");
 		//buttons
 		static final JButton btnEncrypt = new JButton("Encrypt text");
-		static final JButton btnBrowse = new JButton("Encrypt File...");
+		static final JButton btnEncryptFile = new JButton("Encrypt file");
+		static final JButton btnBrowse = new JButton("Browse Files...");
 		static final JButton btnDecrypt = new JButton("Decrypt text");
+		static final JButton btnDecryptFile = new JButton("Decrypt file");
 		static final JButton btnGenerateKeys = new JButton("Generate Keys");
 		static final JButton btnCopyPaste = new JButton("Copy/Paste");
-
-		
 		
 		
 		//creates the window to encrypt messages
 		public static class Message extends JPanel{
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 7504088245074894851L;
 			static Message instance;
 			//constructor
 			public Message(){
 				instance = this;
+				bitSet.setText("64");
 				btnGenerateKeys.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e){
-						generate = new PrimeGen();
+						generate = new PrimeGen(bitSet.getText());
 						keys = generate.getKeys();
 						pubKeybox.setText("" + keys[0]);
 						pubExbox.setText("" + keys[1]);
 						privKeybox.setText("" + keys[2]);
-						//inputField.setText("Test String");
-						
-						//Message.instance.add(pubKeybox);
-						//Message.instance.add(pubExbox);
-						//Message.instance.add(privKeybox);
 					}
 				});
 				
@@ -136,6 +141,134 @@ public class GUI extends JFrame{
 						
 					}
 				});
+				btnBrowse.addActionListener(new ActionListener(){
+					public void actionPerformed(ActionEvent e){
+						JFileChooser fc = new JFileChooser();
+						//TODO Set for users own specific directory
+						fc.setCurrentDirectory(new File("/home/deadmadness/Desktop"));
+						fc.setDialogTitle("File Browser");
+						fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+						fc.setFileFilter(new TxtFileFilter());
+						
+						if(fc.showOpenDialog(btnBrowse) == JFileChooser.APPROVE_OPTION){
+							filePath = fc.getSelectedFile().getAbsolutePath();
+						}
+						System.out.println("File selected: " + filePath);
+						try{
+							FileReader inputFile = new FileReader(filePath);
+							Scanner input = new Scanner(inputFile);
+							while(input.hasNext()){
+								inputString += input.nextLine();
+							}
+							fileBox.setText(filePath);
+							
+							inputFile.close();
+							input.close();
+						} catch(FileNotFoundException e1){
+							e1.printStackTrace();
+							System.exit(0);
+						} catch(IOException e2){
+							e2.printStackTrace();
+						}
+					}
+				});
+				
+				btnEncryptFile.addActionListener(new ActionListener(){
+					public void actionPerformed(ActionEvent e){
+						BigInteger pubKey = new BigInteger("" + pubKeybox.getText());
+						BigInteger pubEx = new BigInteger("" + pubExbox.getText());
+						JFileChooser fc = new JFileChooser();
+						PrintWriter write;
+						String encryptedString = "";
+						
+						System.out.println("inputString: " + inputString);
+						
+						encryptedFile = encrypter.encrypt(inputString, pubKey, pubEx);
+						
+						for(int i=0;i<encryptedFile.length;i++){
+							encryptedString += encryptedFile[i];
+							encryptedString += "-";
+						}
+						
+						fc.setCurrentDirectory(new File("/home/deadmadness/Desktop"));
+						fc.setDialogTitle("File Browser");
+						fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+						fc.setFileFilter(new TxtFileFilter());
+						
+						if(fc.showSaveDialog(btnEncryptFile) == JFileChooser.APPROVE_OPTION){
+							try{
+								write = new PrintWriter(fc.getSelectedFile()+".txt");
+								write.write(encryptedString);
+								write.flush();
+								write.close();
+							} catch (IOException ex){
+								ex.printStackTrace();
+							}
+						}
+						
+					}
+				});
+				
+				btnDecryptFile.addActionListener(new ActionListener(){
+					public void actionPerformed(ActionEvent e){
+						BigInteger pubKey = new BigInteger("" + pubKeybox.getText());
+						BigInteger privKey = new BigInteger("" + privKeybox.getText());
+						BigInteger[] encryptedMessage;
+						
+						FileReader read;
+						PrintWriter write;
+						
+						String encryptedFileString = "";
+						String decryptedFileString = "";
+						String[] parsedMessage;
+						
+						JFileChooser fc = new JFileChooser();
+						Scanner input;
+						
+						fc.setCurrentDirectory(new File("/home/deadmadness/Desktop"));
+						fc.setDialogTitle("File Browser");
+						fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+						fc.setFileFilter(new TxtFileFilter());
+						try{
+							read = new FileReader(fileBox.getText());
+							input = new Scanner(read);
+							while(input.hasNext()){
+								encryptedFileString += input.next();
+							}
+							read.close();
+							input.close();
+						} catch(FileNotFoundException e1){
+							e1.printStackTrace();
+							System.exit(0);
+						} catch(IOException e2){
+							e2.printStackTrace();
+						}
+						
+						parsedMessage = encryptedFileString.split("-");
+						encryptedMessage = new BigInteger[parsedMessage.length];
+						
+						for(int i=0;i<parsedMessage.length;i++){
+							encryptedMessage[i] = new BigInteger("" + parsedMessage[i]);
+						}
+						
+						decryptedFile = encrypter.decrypt(encryptedMessage, pubKey, privKey);
+						
+						for(int i=0;i<decryptedFile.length;i++){
+							decryptedFileString += ((char)decryptedFile[i].intValue());
+						}
+						
+						if(fc.showSaveDialog(btnDecryptFile) == JFileChooser.APPROVE_OPTION){
+							try{
+								write = new PrintWriter(fc.getSelectedFile()+".txt");
+								write.write(decryptedFileString);
+								write.flush();
+								write.close();
+							} catch (IOException ex){
+								ex.printStackTrace();
+							}
+						}
+					}
+				});
 				
 				this.add(lblPublicKey);
 				this.add(pubKeybox);
@@ -147,15 +280,16 @@ public class GUI extends JFrame{
 				this.add(btnCopyPaste);
 				this.add(btnDecrypt);
 				this.add(btnGenerateKeys);
+				this.add(lblSetBits);
+				this.add(bitSet);
 				this.add(btnBrowse);
+				this.add(btnEncryptFile);
+				this.add(btnDecryptFile);
+				this.add(fileBox);
 				this.add(lblInput);
-				//this.add(inputBox);
 				this.add(inputField);
-				//inputBox.setViewportView(inputField);
 				this.add(lblOutput);
-				//this.add(outputBox);
 				this.add(outputField);
-				//outputBox.setViewportView(outputField);
 			}
 			
 			
@@ -183,8 +317,23 @@ public class GUI extends JFrame{
 				btnGenerateKeys.setBounds(200, 175, 200, 50);
 				btnGenerateKeys.setSize(200,20);
 				
+				lblSetBits.setBounds(400, 10 , 30, 30);
+				lblSetBits.setSize(50, 30);
+				
+				bitSet.setBounds(435, 15, 30, 30);
+				bitSet.setSize(30, 25);
+				
 				btnBrowse.setBounds(200, 250, 200, 50);
 				btnBrowse.setSize(200, 30);
+				
+				btnEncryptFile.setBounds(50, 250, 200, 50);
+				btnEncryptFile.setSize(150, 30);
+				
+				btnDecryptFile.setBounds(400, 250, 200, 50);
+				btnDecryptFile.setSize(150, 30);
+				
+				fileBox.setBounds(100, 215, 200, 50);
+				fileBox.setSize(400, 30);
 				
 				btnEncrypt.setBounds(450, 325, 200, 50);
 				btnEncrypt.setSize(125,25);
@@ -195,7 +344,6 @@ public class GUI extends JFrame{
 				btnDecrypt.setBounds(450, 400, 200, 50);
 				btnDecrypt.setSize(125,25);
 				
-				//prev 310 y
 				lblInput.setBounds(50, 310, 50, 10);
 				lblInput.setSize(70,15);
 				
@@ -212,17 +360,7 @@ public class GUI extends JFrame{
 			}
 			
 		}
-		
-		
-		//creates the window for browsing files 
-		public static class Browse extends JPanel{
-			static Browse instance;
-			//constructor
-			public Browse(){
-				instance = this;
 
-			}
-		}
 
 		
 		public GUI(String window, String windowTitle){
@@ -232,13 +370,8 @@ public class GUI extends JFrame{
 				
 				setContentPane(new Message());
 				setSize(600,600);
-				//TODO set up message encryption window class 
 			}
-			else if(window == "fileBox"){
-				setContentPane(new Browse());
-				setSize(400,450);
-				//TODO set up file browser window class
-			}
+
 			
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			
@@ -246,204 +379,9 @@ public class GUI extends JFrame{
 		}
 		public static void main(String[] args) {
 			JFrame message = new GUI("messageBox" ,"RSA Encryption");
-			//JFrame file = new TestGUI("fileBox" ,"Browse files");
 			
 			message.setSize(600, 600);
-			//file.setSize(400, 500);
 			
 
 		}
-	
-	/*
-	public JFrame frame;
-	private final JScrollPane inputBox = new JScrollPane();
-	public String message = "";
-
-
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					GUI window = new GUI();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		
-		
-	}
-
-
-	public GUI() {
-		
-		initialize();
-	}
-
-
-	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 593, 472);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(null);
-		inputBox.setBounds(22, 193, 332, 128);
-		frame.getContentPane().add(inputBox);
-		
-		JTextPane inputField = new JTextPane();
-		inputBox.setViewportView(inputField);
-		
-		JScrollPane outputBox = new JScrollPane();
-		outputBox.setBounds(22, 349, 332, 78);
-		frame.getContentPane().add(outputBox);
-		
-		JTextPane outputField = new JTextPane();
-		outputBox.setViewportView(outputField);
-		
-		JTextPane pubKeybox = new JTextPane();
-		pubKeybox.setBounds(22, 32, 499, 21);
-		frame.getContentPane().add(pubKeybox);
-		
-		JTextPane pubExbox = new JTextPane();
-		pubExbox.setBounds(22, 86, 499, 21);
-		frame.getContentPane().add(pubExbox);
-		
-		JTextPane privKeybox = new JTextPane();
-		privKeybox.setBounds(22, 131, 499, 21);
-		frame.getContentPane().add(privKeybox);
-		
-		JLabel lblOutput = new JLabel("Output");
-		lblOutput.setBounds(22, 333, 70, 15);
-		frame.getContentPane().add(lblOutput);
-		
-		JLabel lblInput = new JLabel("Input");
-		lblInput.setBounds(22, 172, 70, 15);
-		frame.getContentPane().add(lblInput);
-		
-		JLabel lblPublicKey = new JLabel("Public Key");
-		lblPublicKey.setBounds(22, 12, 97, 15);
-		frame.getContentPane().add(lblPublicKey);
-		
-		JLabel lblPrivateKey = new JLabel("Private key");
-		lblPrivateKey.setBounds(22, 116, 97, 15);
-		frame.getContentPane().add(lblPrivateKey);
-		
-		
-		// Encryption button 
-		JButton btnEnter = new JButton("Encrypt");
-		btnEnter.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String encrypted = "";
-				RSA encrypter = new RSA();
-				BigInteger pubKey = new BigInteger("" + pubKeybox.getText());
-				BigInteger pubEx = new BigInteger("" + pubExbox.getText());
-				BigInteger[] ciphertext;
-				message = inputField.getText();
-				//msgLen = message.length();
-				
-				System.out.println("inputField: " + inputField.getText());
-				System.out.println("Message: " + message);
-				System.out.println("Public Key: " + pubKey);
-				System.out.println("Public Exponent: " + pubEx);
-				
-				ciphertext = encrypter.encrypt(message, pubKey, pubEx);
-				
-				System.out.println("Message Encrypted\nEncrypted Message: ");
-				for(int i=0;i<ciphertext.length;i++){
-					System.out.print(ciphertext[i]);
-					encrypted += ciphertext[i];
-					if(i != ciphertext.length-1){
-						encrypted += "-";
-					}
-					
-				}
-				System.out.println("\nCipher Text: " + encrypted);
-				outputField.setText("Ciphertext: " + encrypted);
-			}
-		});
-		btnEnter.setBounds(366, 256, 117, 25);
-		frame.getContentPane().add(btnEnter);
-		
-		JButton btnBrowse = new JButton("Browse..");
-		btnBrowse.setBounds(366, 193, 117, 25);
-		frame.getContentPane().add(btnBrowse);
-		
-		JButton btnDecrypt = new JButton("Decrypt");
-		btnDecrypt.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				RSA encrypter = new RSA();
-				String rawtext = inputField.getText();
-				String[] parsedText = rawtext.split("-");
-				String decryptedMessage = "";
-				BigInteger[] encrypted = new BigInteger[parsedText.length];
-				BigInteger[] decrypted;
-				BigInteger pubKey = new BigInteger("" + pubKeybox.getText());
-				BigInteger privKey = new BigInteger("" + privKeybox.getText());
-				//int[] cipher = new int[plaintext.length()];
-				
-				System.out.println("\nplaintext: \n" + rawtext);
-				System.out.println("Public Key: " + pubKey);
-				System.out.println("Private Key: " + privKey);
-				/*
-				System.out.println("cipher: ");
-				for(int i=0;i<plaintext.length();i++){
-					cipher[i] = ((int)plaintext.charAt(i));
-					System.out.print(cipher[i]);
-				}*//*
-				System.out.println("plaintext length: " + rawtext.length());
-				System.out.println("\nEncrypted: ");
-				for(int i=0;i<parsedText.length;i++){
-
-					encrypted[i] = new BigInteger("" + parsedText[i]);
-					System.out.print("" + encrypted[i]);
-				}
-
-
-				
-				
-				decrypted = encrypter.decrypt(encrypted, pubKey, privKey);
-				System.out.println("\nDecrypted Message outside decrypt(): ");
-				for(int i=0;i<decrypted.length;i++){
-					System.out.print(decrypted[i]);
-					decryptedMessage += ((char)decrypted[i].intValue());
-				}
-				System.out.println("\nDecrypted message: " + decryptedMessage);
-
-				
-				outputField.setText("" + decryptedMessage);
-			}
-		});
-		btnDecrypt.setBounds(366, 292, 117, 25);
-		frame.getContentPane().add(btnDecrypt);
-		
-		JButton btnGenerateKeys = new JButton("Generate Keys");
-		
-		btnGenerateKeys.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String privKey;
-				String pubEx;
-				String pubKey;
-				PrimeGen generator = new PrimeGen();
-				
-				BigInteger[] keys = new BigInteger[3];
-						
-				keys = generator.getKeys();
-				
-				pubKey = "" + keys[0];
-				pubKeybox.setText(pubKey);
-				
-				pubEx = "" + keys[1];
-				pubExbox.setText(pubEx);
-				
-				privKey = "" + keys[2];
-				privKeybox.setText(privKey);
-			}
-		});
-		btnGenerateKeys.setBounds(181, 152, 173, 25);
-		frame.getContentPane().add(btnGenerateKeys);
-		
-		JLabel lblPublicExponent = new JLabel("Public Exponent");
-		lblPublicExponent.setBounds(22, 65, 134, 15);
-		frame.getContentPane().add(lblPublicExponent);
-	}*/
 }
