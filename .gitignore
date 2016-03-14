@@ -6,9 +6,9 @@
 *.ear
 
 # Other Eclipse files #
-.classpath
-.project
-bin/com/deadmadness
-.settings
+*.classpath
+*.project
+*bin/com/deadmadness
+*.settings
 
 
