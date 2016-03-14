@@ -5,4 +5,10 @@
 *.war
 *.ear
 
+# Other Eclipse files #
+.classpath
+.project
+bin/com/deadmadness
+.settings
+
 
