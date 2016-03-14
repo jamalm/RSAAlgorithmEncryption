@@ -1,21 +1,16 @@
 *.class
+.settings
+bin/
+.project
+.classpath
 
-# Package Files # 
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
 *.jar
 *.war
 *.ear
 
-# Other Eclipse files #
-<<<<<<< HEAD
-.classpath
-.project
-bin/
-.settings
-=======
-*.classpath
-*.project
-*bin/com/deadmadness
-*.settings
->>>>>>> d5c1ae90edbd5baa75bd4c659c0656488bc1b43c
-
-
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
