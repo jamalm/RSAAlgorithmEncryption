@@ -217,7 +217,7 @@ public class GUI extends JFrame{
 							input.close();
 						} catch(FileNotFoundException e1){
 							e1.printStackTrace();
-							System.exit(0);
+							//System.exit(0);
 						} catch(IOException e2){
 							e2.printStackTrace();
 						}
@@ -319,7 +319,7 @@ public class GUI extends JFrame{
 									input.close();
 								} catch(FileNotFoundException e1){
 									e1.printStackTrace();
-									System.exit(0);
+									//System.exit(0);
 								} catch(IOException e2){
 									e2.printStackTrace();
 								}
