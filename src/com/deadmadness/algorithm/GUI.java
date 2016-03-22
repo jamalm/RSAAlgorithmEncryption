@@ -15,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -44,6 +45,7 @@ public class GUI extends JFrame{
 		static String outToInput = "";
 		static String filePath = "";
 		static String inputString = "";
+		static final String nullString = "";
 		
 		//first window for message encryption / decryption.
 		
@@ -92,31 +94,57 @@ public class GUI extends JFrame{
 				
 				btnGenerateKeys.addActionListener(new ActionListener(){		//Generate keys button functionality
 					public void actionPerformed(ActionEvent e){
-						generate = new PrimeGen(bitSet.getText());			//instantiate Prime number Generator
-						keys = generate.getKeys();							//Get Encryption keys
-						pubKeybox.setText("" + keys[0]);					//set keys to fields in GUI
-						pubExbox.setText("" + keys[1]);
-						privKeybox.setText("" + keys[2]);
+						
+						
+						//bit size checks
+						if(bitSet.getText().equals(nullString)){
+							JOptionPane.showMessageDialog(null, "Number of Bits not set", "Warning", JOptionPane.INFORMATION_MESSAGE);
+						} else if(Integer.parseInt(bitSet.getText()) > 128 || Integer.parseInt(bitSet.getText()) < 16){
+							JOptionPane.showMessageDialog(null, "Bits must be between 16 and 128", "Warning", JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							System.out.println("BitSet: " + bitSet.getText());
+							generate = new PrimeGen(bitSet.getText());			//instantiate Prime number Generator
+							keys = generate.getKeys();							//Get Encryption keys
+							pubKeybox.setText("" + keys[0]);					//set keys to fields in GUI
+							pubExbox.setText("" + keys[1]);
+							privKeybox.setText("" + keys[2]);
+						}
 					}
 				});
 				
 				btnEncrypt.addActionListener(new ActionListener(){							//Encrypt plaintext messages button
 					public void actionPerformed(ActionEvent e){
-						BigInteger pubKey = new BigInteger("" + pubKeybox.getText());		//public and private keys
-						BigInteger pubEx = new BigInteger("" + pubExbox.getText());
-						String ciphertext = "";												//String representation of encrypted file
 						
-						//encrypting data
-						encrypted = encrypter.encrypt(inputField.getText(), pubKey, pubEx);
+						BigInteger pubKey;	//Public keys declared
+						BigInteger pubEx;
+						String ciphertext = "";	//String representation of encrypted file
 						
-						//Parsing and storing encrypted message as a String
-						for(int i=0;i<encrypted.length;i++){
-							ciphertext += encrypted[i];
-							if(i != encrypted.length-1){
-								ciphertext += "-";
+						//checks for generation of keys
+						if(pubKeybox.getText().equals(nullString) || pubExbox.getText().equals(nullString)){
+							JOptionPane.showMessageDialog(null, "Missing Key", "Warning", JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							pubKey = new BigInteger("" + pubKeybox.getText());		//public keys initialised
+							pubEx = new BigInteger("" + pubExbox.getText());
+
+																	
+							//checks for input
+							if(inputField.getText().equals(nullString)){
+								JOptionPane.showMessageDialog(null, "Input is empty", "Warning", JOptionPane.INFORMATION_MESSAGE);
+							} else {
+								
+								//encrypting data
+								encrypted = encrypter.encrypt(inputField.getText(), pubKey, pubEx);
+								
+								//Parsing and storing encrypted message as a String
+								for(int i=0;i<encrypted.length;i++){
+									ciphertext += encrypted[i];
+									if(i != encrypted.length-1){
+										ciphertext += "-";
+									}
+								}
+								outputField.setText(ciphertext);									//set output to field in GUI
 							}
 						}
-						outputField.setText(ciphertext);									//set output to field in GUI
 					}
 				});
 				btnCopyPaste.addActionListener(new ActionListener(){						//Copy from output to input field in GUI button
@@ -131,23 +159,34 @@ public class GUI extends JFrame{
 						String[] parsedtext = rawtext.split("-");							//parse data, removing the dashes
 						String decryptedString = "";										//String representation of decrypted message
 						
-						BigInteger pubKey = new BigInteger("" + pubKeybox.getText());		//set decryption keys
-						BigInteger privKey = new BigInteger("" + privKeybox.getText());
+						BigInteger pubKey;		//set decryption keys
+						BigInteger privKey;
 						BigInteger[] encrypted = new BigInteger[parsedtext.length];			//initialise the encrypted variable storage
 						
-						
-						
-						for(int i=0;i<parsedtext.length;i++){								
-							encrypted[i] = new BigInteger("" +parsedtext[i]);				//store parsed string into the encrypted BigInteger array
+						//checks for key input
+						if(pubKeybox.getText().equals(nullString) || privKeybox.getText().equals(nullString)){
+							JOptionPane.showMessageDialog(null, "Missing Key", "Warning", JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							pubKey = new BigInteger("" + pubKeybox.getText());
+							privKey = new BigInteger("" + privKeybox.getText());
+							
+							//checks for input 
+							if(inputField.getText().equals(nullString)){
+								JOptionPane.showMessageDialog(null, "Input is empty", "Warning", JOptionPane.INFORMATION_MESSAGE);
+							}else {
+							
+								for(int i=0;i<parsedtext.length;i++){								
+									encrypted[i] = new BigInteger("" +parsedtext[i]);				//store parsed string into the encrypted BigInteger array
+								}
+								
+								decrypted = encrypter.decrypt(encrypted, pubKey, privKey);			//decrypt data
+								for(int i=0;i<decrypted.length;i++){
+									decryptedString += ((char)decrypted[i].intValue());				//store decrypted data, converted to a string
+								}
+								
+								outputField.setText(decryptedString);								//set output field to decrypted data
+							}
 						}
-						
-						decrypted = encrypter.decrypt(encrypted, pubKey, privKey);			//decrypt data
-						for(int i=0;i<decrypted.length;i++){
-							decryptedString += ((char)decrypted[i].intValue());				//store decrypted data, converted to a string
-						}
-						
-						outputField.setText(decryptedString);								//set output field to decrypted data 
-						
 					}
 				});
 				btnBrowse.addActionListener(new ActionListener(){							//Browse files button
@@ -162,6 +201,7 @@ public class GUI extends JFrame{
 						if(fc.showOpenDialog(btnBrowse) == JFileChooser.APPROVE_OPTION){	//if browse files was clicked..
 							filePath = fc.getSelectedFile().getAbsolutePath();				//grab file path user selected
 						}
+						
 						System.out.println("File selected: " + filePath);
 						try{
 							FileReader inputFile = new FileReader(filePath);				//creates file reader to read selected file
@@ -186,37 +226,53 @@ public class GUI extends JFrame{
 				
 				btnEncryptFile.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e){
-						BigInteger pubKey = new BigInteger("" + pubKeybox.getText());		//public key 
-						BigInteger pubEx = new BigInteger("" + pubExbox.getText());			//private key 
+						BigInteger pubKey;		//public key 
+						BigInteger pubEx;			//private key 
 						JFileChooser fc = new JFileChooser();								//filechooser initialisation
 						PrintWriter write;													//writes to a file
 						String encryptedString = "";										//String representation of encrypted file
 						
 						System.out.println("inputString: " + inputString);
 						
-						//encrypting data
-						encryptedFile = encrypter.encrypt(inputString, pubKey, pubEx);		
-						
-						for(int i=0;i<encryptedFile.length;i++){							//converting from BigInteger to String
-							encryptedString += encryptedFile[i];
-							encryptedString += "-";											//parsing each character with a '-'
-						}
-						
-						fc.setCurrentDirectory(new File("/home/deadmadness/Desktop"));		//setup for JFileChooser
-						fc.setDialogTitle("File Browser");
-						fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-						fc.setFileFilter(new TxtFileFilter());
-						
-						//If button clicked..
-						if(fc.showSaveDialog(btnEncryptFile) == JFileChooser.APPROVE_OPTION){
-							try{
-								//write encrypted string to a new file
-								write = new PrintWriter(fc.getSelectedFile()+".txt");
-								write.write(encryptedString);
-								write.flush();												//empty buffer and close filewriter
-								write.close();
-							} catch (IOException ex){
-								ex.printStackTrace();
+							
+						if(pubKeybox.getText().equals(nullString) || pubExbox.getText().equals(nullString)){
+							JOptionPane.showMessageDialog(null, "Missing Key", "Warning", JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							pubKey = new BigInteger("" + pubKeybox.getText());
+							pubEx = new BigInteger("" + pubExbox.getText());
+							
+							
+							if(filePath.equals(nullString)){
+								JOptionPane.showMessageDialog(null, "No File Path Selected", "Warning", JOptionPane.INFORMATION_MESSAGE);
+							} else if(inputString.equals(nullString)){
+								JOptionPane.showMessageDialog(null, "File is Empty", "Warning", JOptionPane.INFORMATION_MESSAGE);
+							} else {
+
+								//encrypting data
+								encryptedFile = encrypter.encrypt(inputString, pubKey, pubEx);		
+								
+								for(int i=0;i<encryptedFile.length;i++){							//converting from BigInteger to String
+									encryptedString += encryptedFile[i];
+									encryptedString += "-";											//parsing each character with a '-'
+								}
+								
+								fc.setCurrentDirectory(new File("/home/deadmadness/Desktop"));		//setup for JFileChooser
+								fc.setDialogTitle("File Browser");
+								fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+								fc.setFileFilter(new TxtFileFilter());
+								
+								//If button clicked..
+								if(fc.showSaveDialog(btnEncryptFile) == JFileChooser.APPROVE_OPTION){
+									try{
+										//write encrypted string to a new file
+										write = new PrintWriter(fc.getSelectedFile()+".txt");
+										write.write(encryptedString);
+										write.flush();												//empty buffer and close filewriter
+										write.close();
+									} catch (IOException ex){
+										ex.printStackTrace();
+									}
+								}
 							}
 						}
 						
@@ -225,8 +281,8 @@ public class GUI extends JFrame{
 				
 				btnDecryptFile.addActionListener(new ActionListener(){						//decrypt file button
 					public void actionPerformed(ActionEvent e){
-						BigInteger pubKey = new BigInteger("" + pubKeybox.getText());		//set public and private keys
-						BigInteger privKey = new BigInteger("" + privKeybox.getText());
+						BigInteger pubKey;		//set public and private keys
+						BigInteger privKey;
 						BigInteger[] encryptedMessage;										//BigInteger to store input of encrypted file
 						
 						FileReader read;													//reading and writing variables
@@ -239,50 +295,62 @@ public class GUI extends JFrame{
 						JFileChooser fc = new JFileChooser();								//JFileChooser initialisation
 						Scanner input;
 						
-						fc.setCurrentDirectory(new File("/home/deadmadness/Desktop"));		//JFileChooser setup
-						fc.setDialogTitle("File Browser");
-						fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-						fc.setFileFilter(new TxtFileFilter());
-						try{
-							//set file reader to path and read input into EncryptedString variable
-							read = new FileReader(fileBox.getText());
-							input = new Scanner(read);
-							while(input.hasNext()){
-								encryptedFileString += input.next();
+						if(pubKeybox.getText().equals(nullString)){
+							JOptionPane.showMessageDialog(null, "Missing Key", "Warning", JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							pubKey = new BigInteger("" + pubKeybox.getText());
+							privKey = new BigInteger("" + privKeybox.getText());
+							
+							if(fileBox.getText().equals(nullString)){
+								JOptionPane.showMessageDialog(null, "No File Path selected", "Warning", JOptionPane.INFORMATION_MESSAGE);
+							} else {
+								fc.setCurrentDirectory(new File("/home/deadmadness/Desktop"));		//JFileChooser setup
+								fc.setDialogTitle("File Browser");
+								fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+								fc.setFileFilter(new TxtFileFilter());
+								try{
+									//set file reader to path and read input into EncryptedString variable
+									read = new FileReader(fileBox.getText());
+									input = new Scanner(read);
+									while(input.hasNext()){
+										encryptedFileString += input.next();
+									}
+									read.close();													//close reader and scanner
+									input.close();
+								} catch(FileNotFoundException e1){
+									e1.printStackTrace();
+									System.exit(0);
+								} catch(IOException e2){
+									e2.printStackTrace();
+								}
+								
+								parsedMessage = encryptedFileString.split("-");						//parsing String data
+								encryptedMessage = new BigInteger[parsedMessage.length];			//initialising encryptedMessage with length of parsed string array
+								
+								for(int i=0;i<parsedMessage.length;i++){
+									encryptedMessage[i] = new BigInteger("" + parsedMessage[i]);	// filling array with parsed data
+								}
+								
+								//decryption
+								decryptedFile = encrypter.decrypt(encryptedMessage, pubKey, privKey);	
+								
+								for(int i=0;i<decryptedFile.length;i++){
+									decryptedFileString += ((char)decryptedFile[i].intValue());		// converting from BigInteger to String
+								}
+								
+								if(fc.showSaveDialog(btnDecryptFile) == JFileChooser.APPROVE_OPTION){	//saving file after decryption
+									try{
+										//writing decrypted data to file
+										write = new PrintWriter(fc.getSelectedFile()+".txt");
+										write.write(decryptedFileString);
+										write.flush();												//flushing buffers and closing writer
+										write.close();
+									} catch (IOException ex){
+										ex.printStackTrace();
+									}
+								}
 							}
-							read.close();													//close reader and scanner
-							input.close();
-						} catch(FileNotFoundException e1){
-							e1.printStackTrace();
-							System.exit(0);
-						} catch(IOException e2){
-							e2.printStackTrace();
-						}
-						
-						parsedMessage = encryptedFileString.split("-");						//parsing String data
-						encryptedMessage = new BigInteger[parsedMessage.length];			//initialising encryptedMessage with length of parsed string array
-						
-						for(int i=0;i<parsedMessage.length;i++){
-							encryptedMessage[i] = new BigInteger("" + parsedMessage[i]);	// filling array with parsed data
-						}
-						
-						//decryption
-						decryptedFile = encrypter.decrypt(encryptedMessage, pubKey, privKey);	
-						
-						for(int i=0;i<decryptedFile.length;i++){
-							decryptedFileString += ((char)decryptedFile[i].intValue());		// converting from BigInteger to String
-						}
-						
-						if(fc.showSaveDialog(btnDecryptFile) == JFileChooser.APPROVE_OPTION){	//saving file after decryption
-							try{
-								//writing decrypted data to file
-								write = new PrintWriter(fc.getSelectedFile()+".txt");
-								write.write(decryptedFileString);
-								write.flush();												//flushing buffers and closing writer
-								write.close();
-							} catch (IOException ex){
-								ex.printStackTrace();
-							}
+							
 						}
 					}
 				});
@@ -395,6 +463,7 @@ public class GUI extends JFrame{
 		//main method
 		public static void main(String[] args) {
 			JFrame message = new GUI("RSA Encryption");	//initialise JFrame
-			message.setSize(600, 600);					//set window size
+			message.setSize(600, 600);	
+			message.move(500, 100);//set window size
 		}
 }

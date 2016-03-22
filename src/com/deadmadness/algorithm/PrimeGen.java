@@ -42,6 +42,7 @@ public class PrimeGen {
 		}
 		
 		d = modInverse(phi, e);
+		System.out.println("(phi): " + phi);
 
 	}
 	
@@ -50,7 +51,7 @@ public class PrimeGen {
 
 	
 	//generates a prime number in a large  num range
-	private BigInteger genLargePrime() {
+	protected BigInteger genLargePrime() {
 		r = new SecureRandom();
 		BigInteger p;
 	
@@ -128,7 +129,59 @@ public class PrimeGen {
 	
 	
 	// checks to see if prime number
-	private boolean isPrime(BigInteger n) {
+	protected boolean isPrime(BigInteger n) {
+		SecureRandom r = new SecureRandom();
+		
+		BigInteger ZERO = BigInteger.ZERO;
+		BigInteger ONE = BigInteger.ONE;
+		BigInteger TWO = new BigInteger("2");
+		
+		BigInteger nMinus = n.subtract(ONE);
+
+		//check if p is even
+		if(n.mod(TWO).equals(ZERO)){
+			System.out.println("P%2 returned true: False prime");
+			return false;
+		}
+		
+		//find n-1 = 2^k*m
+		BigInteger m = nMinus;
+		int k = m.getLowestSetBit();
+		m = m.shiftRight(k);
+
+		System.out.println("Starting loop");
+		
+		//j is our level of certainty
+		for(int j=0;j < 100;j++){
+			//generate a random variable, where 1 < a < n-1
+			BigInteger a;
+			do{
+				a = new BigInteger(n.bitLength(), r);
+			}while(a.compareTo(n) >= 0 || a.compareTo(ONE) <= 0);
+			
+			int i = 0;
+			
+			// b = a^m mod n
+			BigInteger b = a.modPow(m, n);
+			
+			// loop while !b=1 & i=0 OR !b = n-1
+			//these are the conditions required for composite checking
+			while(!((i==0 && b.equals(ONE)) || b.equals(nMinus))){
+				
+				//keep checking if b=1 & i > 0 || i+1 = k
+				/* so skip first check(i=0)
+				 * then b = b^2 mod n, 
+				 * then check if b = 1 or if the next i = k
+				 * k is the lowest set bit number from before
+				 */
+				if(i>0 && b.equals(ONE) || ++i==k){
+					return false;
+				}
+				b = b.modPow(TWO, n);
+			}
+		}
+		return true;
+		/*
 		BigInteger sqRoot = root(n);
 		
 		// if n is less than 2, false
@@ -146,7 +199,7 @@ public class PrimeGen {
 		
 		/*
 		 * i start at 3 to num > sqRoot; add 2 to skip even numbers
-		 */
+		 *//*
 		for(BigInteger i = new BigInteger("3"); i.compareTo(sqRoot)==-1; i = i.add(TWO)) 
 		{
 			//check if num divides evenly anywhere
@@ -158,11 +211,12 @@ public class PrimeGen {
 			
 		}
 		return true;
+		*/
 	}
 	
 	
 	
-	
+	/*
 	
 	//generates an approx root of prime number
 	private static BigInteger root(BigInteger n) {
@@ -173,7 +227,7 @@ public class PrimeGen {
 		}
 		//System.out.println("Root: " + divisor.shiftLeft(1));
 		return divisor.shiftLeft(1);
-	}
+	}*/
 	
 	
 	
