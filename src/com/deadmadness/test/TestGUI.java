@@ -16,6 +16,10 @@ import com.deadmadness.algorithm.*;
 
 public class TestGUI extends JFrame{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2480062251450791219L;
 	//RSA encryption classes
 	static RSA encrypter = new RSA();
 	static PrimeGen generate;
@@ -54,6 +58,10 @@ public class TestGUI extends JFrame{
 	
 	//creates the window to encrypt messages
 	public static class Message extends JPanel{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		static Message instance;
 		//constructor
 		public Message(){
@@ -203,6 +211,10 @@ public class TestGUI extends JFrame{
 	
 	//creates the window for browsing files 
 	public static class Browse extends JPanel{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		static Browse instance;
 		//constructor
 		public Browse(){
@@ -214,12 +226,11 @@ public class TestGUI extends JFrame{
 	
 	public TestGUI(String panel){
 		if(panel == "messageBox"){
-			setContentPane(new Message());
-			//TODO set up message encryption window class 
+			setContentPane(new Message()); 
 		}
 		else if(panel == "fileBox"){
 			setContentPane(new Browse());
-			//TODO set up file browser window class
+			
 		}
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
