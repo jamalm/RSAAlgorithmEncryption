@@ -461,6 +461,7 @@ public class GUI extends JFrame{
 			setVisible(true);
 		}
 		//main method
+		@SuppressWarnings("deprecation")
 		public static void main(String[] args) {
 			JFrame message = new GUI("RSA Encryption");	//initialise JFrame
 			message.setSize(600, 600);	

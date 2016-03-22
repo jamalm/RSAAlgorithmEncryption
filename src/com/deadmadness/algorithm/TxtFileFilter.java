@@ -2,18 +2,26 @@ package com.deadmadness.algorithm;
 
 import java.io.File;
 
+/*
+ * 
+ * 
+ * Class to set file filters for the JFileChooser 
+ * to display to the user
+ * @author deadmadness
+ */
+
 import javax.swing.filechooser.FileFilter;
 
 public class TxtFileFilter extends FileFilter {
-	private String fileFormat = "TXT";
+	private String txtFormat = "TXT";
 	private char dot = '.';
 	
 	@Override
 	public boolean accept(File f) {
-		if(f.isDirectory()){
+		/*if(f.isDirectory()){
 			return true;
-		}
-		if(extension(f).equalsIgnoreCase(fileFormat)){
+		}*/
+		if(extension(f).equalsIgnoreCase(txtFormat)){
 			return true;
 		}
 		else{

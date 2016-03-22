@@ -14,33 +14,44 @@ public class PrimeGen {
 	
 	//Set to 128 for 2^128 numbers
 	private int bitSize;
-	private static final BigInteger TWO = new BigInteger("2");
+	//private static final BigInteger TWO = new BigInteger("2");
 
+	//large primes p and q
 	private BigInteger p;
 	private BigInteger q;
+	//public key
 	private BigInteger n;
+	//public exponent
 	private BigInteger e;
+	//private key
 	private BigInteger d;
+	//phi is n-1
 	private BigInteger phi;
 	
 	
 	
-	//constructor
+	//constructor to initialise public/private keys and public exponent
 	public PrimeGen(String bits){
+		//set the number size i.e. 2^bits
 		setBits(bits);
+		//generate p and q prime numbers
 		p = genLargePrime();
 		q = genLargePrime();
+		//set n = pq
 		n = p.multiply(q);
 				
 		// phi = (p-1) * (q-1)
 		phi = (p.subtract(BigInteger.ONE).multiply((q.subtract(BigInteger.ONE))));
+		//set e so that 1<e<phi && e and phi are coprime
 		e = genE(phi);
 		
-		
+		//if genE returns 0, error occured, try again
 		while(e.equals(BigInteger.ZERO)){
 			e = genE(phi);
 		}
 		
+		// e*d = 1 mod(phi)
+		//i.e. get the mod inverse of E to find D
 		d = modInverse(phi, e);
 		System.out.println("(phi): " + phi);
 
@@ -50,20 +61,26 @@ public class PrimeGen {
 	
 
 	
-	//generates a prime number in a large  num range
+	//generates a prime number in a set number range (see bits in constructor)
 	protected BigInteger genLargePrime() {
+		//securely generates a random number
 		r = new SecureRandom();
+		//p is our prime in question
 		BigInteger p;
-	
+		
+		// loop until we find a prime
 		while(true){
+			//initialise p randomly in the range of 2^bitSize
 			p = new BigInteger(bitSize, r); //p = r.nextInt(Integer.MAX_VALUE/5 - (Integer.MAX_VALUE/10)) + (Integer.MAX_VALUE/10);
 			
 			System.out.println("Calculating Prime: " + p + " with bitSize: " + bitSize);
 			
+			//check if prime, if true, break from loop
 			if(isPrime(p)) {
 				System.out.println("Prime Number:" + p);
 				break;
 			}
+			//else if false, number is composite and try again
 			else {
 				System.out.println("no prime found");
 			}
@@ -74,21 +91,25 @@ public class PrimeGen {
 	
 	
 	
-	
-	
-	
+	/*
+	 * genE is used to choose E so that 1<e<phi && e is coprime with phi
+	 */
 	private BigInteger genE(BigInteger phi) {
+		//generate a random number
 		BigInteger e = genLargePrime();
 		
+		//check if e is greater than phi, if true, return error 
 		if(e.compareTo(phi) == 1){
 			System.out.println("E is larger than Phi - failed!");
 			return BigInteger.ZERO;
 		}
 		
+		// if gcd(phi,e) = 1, return e
 		if(gcd(e,phi)) {
 			System.out.println("Relatively prime: "+e+" "+phi);
 			return e;
 		}
+		//else return error
 		else{
 			System.out.println("Failed, E and phi not relatively prime");
 			return BigInteger.ZERO;
@@ -102,21 +123,34 @@ public class PrimeGen {
 	//calculates if e and phi are relatively prime
 	private boolean gcd(BigInteger a, BigInteger b) {
 		BigInteger i;
-		
+		//if phi mod e is 0, return false
 		if(b.mod(a) == BigInteger.ZERO) {
 			return false;
 		}
+		//else set i to be phi mod e
 		else {
 			i = b.mod(a);
 		}
+		
+		//while i is not 0, iterate through the gcd
+		/*
+		 * algorithm:
+		 * 1. phi = e
+		 * 2. e = i
+		 * 3. i = phi mod e
+		 * 4. loop until phi mod e returns 0
+		 */
 		while(i.compareTo(BigInteger.ZERO) != 0) {
 			b = a;
 			a = i;
 			i = b.mod(a);
 		}
+		
+		//if the remainder is 1, return true
 		if(a.compareTo(BigInteger.ONE) == 0){
 			return true;
 		}
+		//else it's not coprime, return false
 		else {
 			return false;
 		}
@@ -128,17 +162,23 @@ public class PrimeGen {
 	
 	
 	
-	// checks to see if prime number
+	// checks to see if number is composite(false) or prime(true)
+	/*
+	 * for this I used the Rabin Miller probable primality test algorithm 
+	 * due to it's speed and higher accuracy compared to Little Fermat's theorem
+	 */
 	protected boolean isPrime(BigInteger n) {
+		//securely generates a random number
 		SecureRandom r = new SecureRandom();
 		
 		BigInteger ZERO = BigInteger.ZERO;
 		BigInteger ONE = BigInteger.ONE;
 		BigInteger TWO = new BigInteger("2");
 		
+		// nMinus = n - 1
 		BigInteger nMinus = n.subtract(ONE);
 
-		//check if p is even
+		//check if n is even, returns composite if true
 		if(n.mod(TWO).equals(ZERO)){
 			System.out.println("P%2 returned true: False prime");
 			return false;
@@ -146,12 +186,14 @@ public class PrimeGen {
 		
 		//find n-1 = 2^k*m
 		BigInteger m = nMinus;
+		//k is the power, set it to the lowermost bit of m
 		int k = m.getLowestSetBit();
+		//shift m over by k bits
 		m = m.shiftRight(k);
 
 		System.out.println("Starting loop");
 		
-		//j is our level of certainty
+		//j is our level of certainty which is set to 100 by default, we want a high chance of primality for each number
 		for(int j=0;j < 100;j++){
 			//generate a random variable, where 1 < a < n-1
 			BigInteger a;
@@ -181,6 +223,13 @@ public class PrimeGen {
 			}
 		}
 		return true;
+		
+		/*
+		 * Below is the commented out version of primality testing 
+		 * It was my original prime check before using rabin miller algorithm
+		 * Much slower for larger numbers
+		 */
+		
 		/*
 		BigInteger sqRoot = root(n);
 		
@@ -234,7 +283,7 @@ public class PrimeGen {
 	
 	
 	
-	//Gets ed mod phi = 1
+	//Gets ed mod phi = 1 using the extended euclidean algorithm
 	private BigInteger modInverse(BigInteger phi ,BigInteger e){
 		
 		BigInteger p = phi;
@@ -245,24 +294,39 @@ public class PrimeGen {
 		BigInteger temp;
 		BigInteger q, r;
 		
+		//while e is not 0
 		while(!e.equals(BigInteger.ZERO)){
+			//quotient = phi/e
 			q = p.divide(e);
+			//remainder = p - (quotient*e)
 			r = p.subtract(q.multiply(e));
 			
+			//swapping variables before doing arithmetic
+			//phi = e
 			p = e;
+			//e = remainder
 			e = r;
 			
+			//temporarily store x1
 			temp = x1;
+			//x1 = x2 - (quotient*x1)
 			x1 = x2.subtract(q.multiply(x1));
+			//move x1 into x2 i.e. the previous X
 			x2 = temp;
 			
+			//temporarily store y1
 			temp = y1;
+			//y1 = y2 - (quotient*y1)
 			y1 = y2.subtract(q.multiply(y1));
+			//move the current y into the previous y slot
 			y2 = temp;
 		}
+		//check if the last y was negative
 		if(y2.compareTo(BigInteger.ZERO) == -1){
+			//if true, return phi+y2
 			return phi.add(y2);
 		}
+		//else if positive, return y2
 		else{
 			return y2;
 		}
@@ -281,6 +345,7 @@ public class PrimeGen {
 		return keys;
 	}
 	
+	//getter and setter for bit size of prime numbers
 	public void setBits(String bits){
 		
 		bitSize = Integer.parseInt(bits);
